@@ -1,5 +1,5 @@
 defmodule HtmlSanitizeExScrubberBasicHTMLTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   defp basic_html_sanitize(text) do
     HtmlSanitizeEx.basic_html(text)
@@ -135,42 +135,12 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
              basic_html_sanitize(input)
   end
 
-  @a_href_hacks [
-    "<a href=\"javascript:alert('XSS');\">text here</a>",
-    "<a href=javascript:alert('XSS')>text here</a>",
-    "<a href=JaVaScRiPt:alert('XSS')>text here</a>",
-    "<a href=javascript:alert(&quot;XSS&quot;)>text here</a>",
-    "<a href=javascript:alert(String.fromCharCode(88,83,83))>text here</a>",
-    "<a href=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>text here</a>",
-    "<a href=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>text here</a>",
-    "<a href=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>text here</a>",
-    "<a href=\"jav\tascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x09;ascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x0A;ascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x0D;ascript:alert('XSS');\">text here</a>",
-    "<a href=\" &#14;  javascript:alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x3a;alert('XSS');\">text here</a>",
-    "<a href=`javascript:alert(\"RSnake says, 'XSS'\")`>text here</a>",
-    "<a href=\"javascript&#x3a;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x003a;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x3A;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x003A;alert('XSS');\">text here</a>",
-    "<a href=\"&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;\">text here</a>",
-    "<a href=\"JAVASCRIPT:alert(\'foo\')\">text here</a>",
-    "<a href=\"java<!-- -->script:alert(\'foo\')\">text here</a>",
-    "<a href=\"awesome.html#this:stuff\">text here</a>",
-    "<a href=\"java\0&#14;\t\r\n script:alert(\'foo\')\">text here</a>",
-    "<a href=\"java&#0000001script:alert(\'foo\')\">text here</a>",
-    "<a href=\"java&#0000000script:alert(\'foo\')\">text here</a>"
-  ]
-
   @tag href_scrubbing: true
   test "strips malicious protocol hacks from a href attribute" do
+    {_, href_hacks} = Fixtures.a_href_hacks()
     expected = "<a>text here</a>"
 
-    Enum.each(@a_href_hacks, fn x ->
-      assert expected == basic_html_sanitize(x)
-    end)
+    Enum.each(href_hacks, fn x -> assert expected == basic_html_sanitize(x) end)
   end
 
   @tag href_scrubbing: true
@@ -251,9 +221,7 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
   @tag href_scrubbing: true
   test "should only allow http/https protocols" do
     assert "<a href=\"foo\">baz</a>" ==
-             basic_html_sanitize(
-               ~s(<a href="foo" onclick="bar"><script>baz</script></a>)
-             )
+             basic_html_sanitize(~s(<a href="foo" onclick="bar"><script>baz</script></a>))
 
     assert "<a href=\"http://example.com\">baz</a>" ==
              basic_html_sanitize(
@@ -283,30 +251,10 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
     assert expected == basic_html_sanitize(input)
   end
 
-  @image_src_hacks [
-    "<IMG SRC=\"javascript:alert('XSS');\">",
-    "<IMG SRC=javascript:alert('XSS')>",
-    "<IMG SRC=JaVaScRiPt:alert('XSS')>",
-    "<IMG SRC=javascript:alert(&quot;XSS&quot;)>",
-    "<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>",
-    "<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>",
-    "<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>",
-    "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>",
-    "<IMG SRC=\"jav\tascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x09;ascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x0A;ascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x0D;ascript:alert('XSS');\">",
-    "<IMG SRC=\" &#14;  javascript:alert('XSS');\">",
-    "<IMG SRC=\"javascript&#x3a;alert('XSS');\">",
-    "<IMG SRC=`javascript:alert(\"RSnake says, 'XSS'\")`>"
-  ]
-
   test "strips malicious protocol hacks from img src attribute" do
-    expected = "<img />"
+    {expected, image_src_hacks} = Fixtures.image_src_hacks()
 
-    Enum.each(@image_src_hacks, fn x ->
-      assert expected == basic_html_sanitize(x)
-    end)
+    Enum.each(image_src_hacks, fn x -> assert expected == basic_html_sanitize(x) end)
   end
 
   test "strips script tag" do
@@ -361,9 +309,7 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
 
   test "should_sanitize_non_alpha_and_non_digit_characters_in_tags" do
     assert "<a></a>foo" ==
-             basic_html_sanitize(
-               "<a onclick!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>foo</a>"
-             )
+             basic_html_sanitize("<a onclick!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>foo</a>")
   end
 
   test "should_sanitize_invalid_tag_names_in_single_tags" do
@@ -427,6 +373,10 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
     assert "<span></span>" == basic_html_sanitize("<span class=\"\\")
   end
 
+  test "should_not_crash_on_dangling_processing_instruction" do
+    assert "hello&lt;?" == basic_html_sanitize("hello<?")
+  end
+
   # test "this affects only NS4, but we're on a roll, right?" do
   #  input = "<div size=\"&{alert('XSS')}\">foo</div>"
   #  expected = "<div>foo</div>"
@@ -450,5 +400,13 @@ defmodule HtmlSanitizeExScrubberBasicHTMLTest do
     """
 
     assert input == basic_html_sanitize(input)
+  end
+
+  test "should sanitize truncated processing-instruction marker" do
+    assert "IkMBuX6PU&lt;?" == basic_html_sanitize("IkMBuX6PU<?")
+  end
+
+  test "should sanitize truncated processing-instruction marker /2" do
+    assert "&lt;?xml" == basic_html_sanitize("<?xml")
   end
 end

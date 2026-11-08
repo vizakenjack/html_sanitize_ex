@@ -3,12 +3,37 @@ defmodule HtmlSanitizeEx.Scrubber.CSS do
   Scrub CSS.
   """
 
-  def scrub(nil), do: ""
+  def scrub(text) when is_binary(text) do
+    text
+    |> decode_escaped_characters()
+    |> remove_comment_markers()
+    |> scrub_property_value_pairs()
+    |> remove_imports()
+  end
 
-  def scrub(text) do
-    text = String.replace(text, ~r/(\/\*|\*\/|<!--|-->)/, " ")
+  def scrub(_nil_or_nested_tags), do: ""
 
-    Regex.replace(~r/([-\w]+)\s*:\s*([^:;]*)/, text, fn _all, a, b ->
+  defp decode_escaped_characters(text) do
+    Regex.replace(~r/\\([0-9A-Fa-f]{1,6})(?:\r\n|[\n\r\f\t ])?/, text, fn _, hex ->
+      hex |> String.to_integer(16) |> escaped_code_point()
+    end)
+  end
+
+  # Surrogates and code points past U+10FFFF can't be encoded as UTF-8;
+  # CSS Syntax decodes them as U+FFFD.
+  defp escaped_code_point(code) when code in 0xD800..0xDFFF or code > 0x10FFFF, do: "\uFFFD"
+  defp escaped_code_point(code), do: <<code::utf8>>
+
+  defp remove_comment_markers(text) do
+    String.replace(text, ~r/(\/\*|\*\/|<!--|-->)/, " ")
+  end
+
+  defp remove_imports(text) do
+    String.replace(text, ~r/\@import\s*[^\);\s]+[\);\s]*/i, "")
+  end
+
+  defp scrub_property_value_pairs(text) do
+    Regex.replace(~r/([-\w]{1,64})\s*:\s*([^:;]*)/, text, fn _all, a, b ->
       case scrub_css(a, b) do
         {property, value} -> "#{property}: #{value}"
         nil -> ""
@@ -179,6 +204,7 @@ defmodule HtmlSanitizeEx.Scrubber.CSS do
     "green",
     "!important",
     "italic",
+    "justify",
     "left",
     "lime",
     "maroon",

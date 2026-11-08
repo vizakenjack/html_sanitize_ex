@@ -5,6 +5,15 @@ defmodule HtmlSanitizeEx.Scrubber.NoScrub do
   This meant for testing purposes and as a template for your own scrubber.
   """
 
+  @behaviour HtmlSanitizeEx.Scrubber
+
+  @doc """
+  Scrubs neither tags, nor their attributes.
+  """
+  def sanitize(html) do
+    HtmlSanitizeEx.Scrubber.scrub(html, __MODULE__)
+  end
+
   @doc """
   Can be used to preprocess the given +html+ String before it is scrubbed.
   """
@@ -12,30 +21,29 @@ defmodule HtmlSanitizeEx.Scrubber.NoScrub do
     html
   end
 
-  @doc """
-  Scrubs a single tag given its attributes and children.
+  def scrub("" <> text) do
+    text
+  end
 
-  Calls `scrub_attribute/2` to scrub individual attributes.
+  def scrub({token, children}) do
+    {token, children}
+  end
+
+  @doc """
+  Scrubs its argument. Possible arguments are the following.
+  * A single tag given its attributes and children: `{tag, attributes, children}`.
+    In this case calls `scrub_attribute/2` to scrub individual attributes.
+  * Tokens like comments and doctypes: `{_token, children}`.
+  * A text node.
   """
   def scrub({tag, attributes, children}) do
     {tag, scrub_attributes(tag, attributes), children}
   end
 
-  @doc """
-  Scrubs tokens like comments and doctypes.
-  """
-  def scrub({_token, children}), do: children
-
-  @doc """
-  Scrubs a text node.
-  """
-  def scrub(text) do
-    text
-  end
-
   @doc false
   def scrub_attributes(tag, attributes) do
-    Enum.map(attributes, fn attr -> scrub_attribute(tag, attr) end)
+    attributes
+    |> Enum.map(fn attr -> scrub_attribute(tag, attr) end)
     |> Enum.reject(&is_nil(&1))
   end
 

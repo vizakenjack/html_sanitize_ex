@@ -1,5 +1,148 @@
 # Changelog
 
+## 1.5.6
+
+Security fixes
+
+- Handling invalid CSS escapes
+- CVE to be published (handling of malicious data attribute in <meta> tags)
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.5.5
+
+Security fixes
+
+- CVE to be published (handling of malicious <meta> tags)
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.5.4
+
+Security fixes
+
+- CVE-2026-68747 (handling of malicious @import in CSS)
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.5.3
+
+Security fixes
+
+- CVE-2026-68750
+- CVE-2026-68749
+- CVE-2026-66829
+- CVE-2026-66370
+- CVE-2026-66843
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.5.2
+
+- Prevent crash on `<?` (truncated processing-instruction marker)
+
+## 1.5.1
+
+- Fix compatibility & compiler warnings with Elixir 1.20.0-rc.5
+- Add justify keyword to CSS scrubber
+
+## 1.5.0
+
+
+### New API for Custom Scrubbers
+
+Instead of importing and requiring `HtmlSanitizeEx.Scrubber.Meta`, just use `HtmlSanitizeEx`:
+
+```elixir
+defmodule MyScrubber do
+  use HtmlSanitizeEx
+
+  allow_tag_with_these_attributes("p", ["title"])
+end
+```
+
+Using `HtmlSanitizeEx` also creates a `sanitize/1` function in the module, so you can just call `MyScrubber.sanitize(html)`.
+
+
+`allow_tag_with_these_attributes/3` is taking a `do` block, which allows specific handling of `attribute`/`value` pairs:
+
+```elixir
+defmodule MyScrubber do
+  use HtmlSanitizeEx
+
+  allow_tag_with_these_attributes("p", ["title"]) do
+    {"class", value} when value in ["red", "green", "blue"] ->
+      {"class", value}
+  end
+end
+```
+
+The handler either returns a `{attribute, value}` pair or `nil` to scrub the value.
+
+
+### Extending existing Scrubbers
+
+`HtmlSanitizeEx` can also be used for extending existing scrubbers:
+
+```elixir
+defmodule MyScrubber do
+  use HtmlSanitizeEx, extend: :basic_html
+
+  allow_tag_with_these_attributes("p", ["title"])
+end
+```
+
+You can extend `:basic_html`, `:html5`, `:markdown_html` and `:strip_tags`.
+
+You can also extend any custom scrubber you created:
+
+```elixir
+defmodule MyOtherScrubber do
+  use HtmlSanitizeEx, extend: MyScrubber
+
+  allow_tag_with_these_attributes("p", ["class"])
+end
+```
+
+The result is a scrubber that works like the built-in BasicHTML scrubber, but also allows `class` and `title` attributes on `<p>` tags.
+
+## 1.4.6
+
+Security fixes
+
+- CVE to be published
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.4.5
+
+Security fixes
+
+- CVE-2026-68750
+- CVE-2026-68749
+- CVE-2026-68747
+- CVE-2026-66829
+- CVE-2026-66370
+- CVE-2026-66843
+
+see https://hex.pm/packages/html_sanitize_ex/advisories for more info
+
+## 1.4.4
+
+- Fix compatibility & compiler warnings with Elixir 1.19
+- Update `mochiweb` to version 3.2.2 in `mix.lock` for OTP 27 compatibility
+- Add missing `<details>` tag to `HTML5` scrubber
+
+## 1.4.3
+
+- Allow `mochiweb` dep to be `~> 2.15 or ~> 3.1`
+
+## 1.4.2
+
+- Fix regression when parsing schemes from URIs
+- Fix compiler warnings
+- Add missing `<body>` tag to `HTML5` scrubber
+
 ## 1.4.1
 
 - Add missing `<h6>` tag to `BasicHTML` and `MarkdownHTML` scrubbers

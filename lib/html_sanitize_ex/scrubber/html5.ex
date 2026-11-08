@@ -16,22 +16,17 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
   @moduledoc """
   Allows all HTML5 tags to support user input.
 
-  Sanitizes all malicious content.
+  This should be used as a template for your own, more tailored scrubber!
+
+  Sanitizes all objectively malicious content, but for example, this allows all `data-*` attributes,
+  which might be an unsafe choice, depending on which frontend frameworks your site uses.
   """
 
-  require HtmlSanitizeEx.Scrubber.Meta
-  alias HtmlSanitizeEx.Scrubber.Meta
+  use HtmlSanitizeEx, extend: :strip_tags
 
-  # Removes any CDATA tags before the traverser/scrubber runs.
-  Meta.remove_cdata_sections_before_scrub()
+  allow_tag_with_uri_attributes("a", ["href"], ["http", "https", "mailto"])
 
-  Meta.strip_comments()
-
-  @valid_schemes ["http", "https", "mailto"]
-
-  Meta.allow_tag_with_uri_attributes("a", ["href"], @valid_schemes)
-
-  Meta.allow_tag_with_these_attributes("a", [
+  allow_tag_with_these_attributes("a", [
     "accesskey",
     "class",
     "contenteditable",
@@ -61,7 +56,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "type"
   ])
 
-  Meta.allow_tag_with_these_attributes("article", [
+  allow_tag_with_these_attributes("article", [
     "accesskey",
     "autocapitalize",
     "class",
@@ -88,7 +83,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("aside", [
+  allow_tag_with_these_attributes("aside", [
     "accesskey",
     "autocapitalize",
     "class",
@@ -115,7 +110,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("b", [
+  allow_tag_with_these_attributes("b", [
     "accesskey",
     "class",
     "contenteditable",
@@ -139,7 +134,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("blockquote", [
+  allow_tag_with_these_attributes("blockquote", [
     "accesskey",
     "cite",
     "class",
@@ -162,29 +157,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("br", [
-    "accesskey",
-    "class",
-    "contenteditable",
-    "contextmenu",
-    "dir",
-    "draggable",
-    "dropzone",
-    "hidden",
-    "id",
-    "itemid",
-    "itemprop",
-    "itemref",
-    "itemscope",
-    "itemtype",
-    "lang",
-    "spellcheck",
-    "tabindex",
-    "title",
-    "translate"
-  ])
-
-  Meta.allow_tag_with_these_attributes("caption", [
+  allow_tag_with_these_attributes("body", [
     "accesskey",
     "class",
     "contenteditable",
@@ -208,7 +181,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("code", [
+  allow_tag_with_these_attributes("br", [
     "accesskey",
     "class",
     "contenteditable",
@@ -230,7 +203,53 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("del", [
+  allow_tag_with_these_attributes("caption", [
+    "accesskey",
+    "class",
+    "contenteditable",
+    "contextmenu",
+    "dir",
+    "draggable",
+    "dropzone",
+    "hidden",
+    "id",
+    "inert",
+    "itemid",
+    "itemprop",
+    "itemref",
+    "itemscope",
+    "itemtype",
+    "lang",
+    "role",
+    "spellcheck",
+    "tabindex",
+    "title",
+    "translate"
+  ])
+
+  allow_tag_with_these_attributes("code", [
+    "accesskey",
+    "class",
+    "contenteditable",
+    "contextmenu",
+    "dir",
+    "draggable",
+    "dropzone",
+    "hidden",
+    "id",
+    "itemid",
+    "itemprop",
+    "itemref",
+    "itemscope",
+    "itemtype",
+    "lang",
+    "spellcheck",
+    "tabindex",
+    "title",
+    "translate"
+  ])
+
+  allow_tag_with_these_attributes("del", [
     "accesskey",
     "cite",
     "datetime",
@@ -254,7 +273,36 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("div", [
+  allow_tag_with_these_attributes("details", [
+    "accesskey",
+    "autocapitalize",
+    "autofocus",
+    "class",
+    "contenteditable",
+    "dir",
+    "draggable",
+    "hidden",
+    "id",
+    "inert",
+    "inputmode",
+    "is",
+    "itemid",
+    "itemprop",
+    "itemref",
+    "itemscope",
+    "itemtype",
+    "lang",
+    "name",
+    "open",
+    "slot",
+    "spellcheck",
+    "style",
+    "tabindex",
+    "title",
+    "translate"
+  ])
+
+  allow_tag_with_these_attributes("div", [
     "accesskey",
     "class",
     "contenteditable",
@@ -278,7 +326,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("em", [
+  allow_tag_with_these_attributes("em", [
     "accesskey",
     "class",
     "contenteditable",
@@ -300,7 +348,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("footer", [
+  allow_tag_with_these_attributes("footer", [
     "accesskey",
     "autocapitalize",
     "class",
@@ -327,7 +375,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h1", [
+  allow_tag_with_these_attributes("h1", [
     "accesskey",
     "class",
     "contenteditable",
@@ -351,7 +399,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h2", [
+  allow_tag_with_these_attributes("h2", [
     "accesskey",
     "class",
     "contenteditable",
@@ -375,7 +423,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h3", [
+  allow_tag_with_these_attributes("h3", [
     "accesskey",
     "class",
     "contenteditable",
@@ -399,7 +447,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h4", [
+  allow_tag_with_these_attributes("h4", [
     "accesskey",
     "class",
     "contenteditable",
@@ -423,7 +471,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h5", [
+  allow_tag_with_these_attributes("h5", [
     "accesskey",
     "class",
     "contenteditable",
@@ -447,7 +495,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("h6", [
+  allow_tag_with_these_attributes("h6", [
     "accesskey",
     "class",
     "contenteditable",
@@ -471,7 +519,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("head", [
+  allow_tag_with_these_attributes("head", [
     "accesskey",
     "class",
     "contenteditable",
@@ -495,7 +543,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("header", [
+  allow_tag_with_these_attributes("header", [
     "accesskey",
     "class",
     "contenteditable",
@@ -519,7 +567,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("hgroup", [
+  allow_tag_with_these_attributes("hgroup", [
     "accesskey",
     "class",
     "contenteditable",
@@ -543,7 +591,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("hr", [
+  allow_tag_with_these_attributes("hr", [
     "accesskey",
     "class",
     "contenteditable",
@@ -567,7 +615,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("html", [
+  allow_tag_with_these_attributes("html", [
     "accesskey",
     "class",
     "contenteditable",
@@ -592,7 +640,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "manifest"
   ])
 
-  Meta.allow_tag_with_these_attributes("i", [
+  allow_tag_with_these_attributes("i", [
     "accesskey",
     "class",
     "contenteditable",
@@ -616,9 +664,9 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_uri_attributes("iframe", ["src"], @valid_schemes)
+  allow_tag_with_uri_attributes("iframe", ["src"], ["http", "https", "mailto"])
 
-  Meta.allow_tag_with_these_attributes("iframe", [
+  allow_tag_with_these_attributes("iframe", [
     "accesskey",
     "class",
     "contenteditable",
@@ -647,13 +695,13 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "height"
   ])
 
-  Meta.allow_tag_with_uri_attributes(
+  allow_tag_with_uri_attributes(
     "img",
     ["src", "lowsrc", "srcset"],
-    @valid_schemes
+    ["http", "https", "mailto"]
   )
 
-  Meta.allow_tag_with_these_attributes("img", [
+  allow_tag_with_these_attributes("img", [
     "accesskey",
     "class",
     "contenteditable",
@@ -680,12 +728,13 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "usemap",
     "ismap",
     "width",
-    "height"
+    "height",
+    "sizes"
   ])
 
-  Meta.allow_tag_with_uri_attributes("input", ["src"], @valid_schemes)
+  allow_tag_with_uri_attributes("input", ["src"], ["http", "https", "mailto"])
 
-  Meta.allow_tag_with_these_attributes("input", [
+  allow_tag_with_these_attributes("input", [
     "accesskey",
     "class",
     "contenteditable",
@@ -714,12 +763,6 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "checked",
     "dirname",
     "disabled",
-    "form",
-    "formaction",
-    "formenctype",
-    "formmethod",
-    "formnovalidate",
-    "formtarget",
     "height",
     "inputmode",
     "list",
@@ -739,7 +782,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "width"
   ])
 
-  Meta.allow_tag_with_these_attributes("ins", [
+  allow_tag_with_these_attributes("ins", [
     "accesskey",
     "class",
     "contenteditable",
@@ -765,7 +808,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "datetime"
   ])
 
-  Meta.allow_tag_with_these_attributes("kbd", [
+  allow_tag_with_these_attributes("kbd", [
     "accesskey",
     "class",
     "contenteditable",
@@ -789,7 +832,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("keygen", [
+  allow_tag_with_these_attributes("keygen", [
     "accesskey",
     "class",
     "contenteditable",
@@ -814,12 +857,11 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "autofocus",
     "challenge",
     "disabled",
-    "form",
     "keytype",
     "name"
   ])
 
-  Meta.allow_tag_with_these_attributes("label", [
+  allow_tag_with_these_attributes("label", [
     "accesskey",
     "class",
     "contenteditable",
@@ -841,11 +883,10 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "tabindex",
     "title",
     "translate",
-    "form",
     "for"
   ])
 
-  Meta.allow_tag_with_these_attributes("legend", [
+  allow_tag_with_these_attributes("legend", [
     "accesskey",
     "class",
     "contenteditable",
@@ -869,7 +910,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("li", [
+  allow_tag_with_these_attributes("li", [
     "accesskey",
     "class",
     "contenteditable",
@@ -894,10 +935,10 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "value"
   ])
 
-  # Meta.allow_tag_with_uri_attributes   "link", ["href"], @valid_schemes
-  # Meta.allow_tag_with_these_attributes "link", ["href rel media hreflang type sizes"]
+  # allow_tag_with_uri_attributes   "link", ["href"], ["http", "https", "mailto"]
+  # allow_tag_with_these_attributes "link", ["href rel media hreflang type sizes"]
 
-  Meta.allow_tag_with_these_attributes("map", [
+  allow_tag_with_these_attributes("map", [
     "accesskey",
     "class",
     "contenteditable",
@@ -922,7 +963,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "name"
   ])
 
-  Meta.allow_tag_with_these_attributes("mark", [
+  allow_tag_with_these_attributes("mark", [
     "accesskey",
     "class",
     "contenteditable",
@@ -946,7 +987,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("menu", [
+  allow_tag_with_these_attributes("menu", [
     "accesskey",
     "class",
     "contenteditable",
@@ -972,7 +1013,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "label"
   ])
 
-  Meta.allow_tag_with_these_attributes("meta", [
+  allow_tag_with_these_attributes("meta", [
     "accesskey",
     "class",
     "contenteditable",
@@ -995,12 +1036,12 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "title",
     "translate",
     "name",
-    "http-equiv",
     "content",
-    "charset"
+    "charset",
+    "http-equiv"
   ])
 
-  Meta.allow_tag_with_these_attributes("meter", [
+  allow_tag_with_these_attributes("meter", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1030,7 +1071,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "optimum"
   ])
 
-  Meta.allow_tag_with_these_attributes("nav", [
+  allow_tag_with_these_attributes("nav", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1054,9 +1095,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  # Meta.allow_tag_with_these_attributes "noscript"
-
-  Meta.allow_tag_with_these_attributes("object", [
+  allow_tag_with_these_attributes("object", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1078,17 +1117,23 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "tabindex",
     "title",
     "translate",
-    "data",
     "type",
     "typemustmatch",
     "name",
     "usemap",
-    "form",
     "width",
     "height"
-  ])
+  ]) do
+    {"data", value} ->
+      cond do
+        value =~ ~r/^\//i -> nil
+        value =~ ~r/(javascript|data)/i -> nil
+        value =~ ~r/^https?:/i -> nil
+        true -> {"data", value}
+      end
+  end
 
-  Meta.allow_tag_with_these_attributes("ol", [
+  allow_tag_with_these_attributes("ol", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1114,7 +1159,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "start"
   ])
 
-  Meta.allow_tag_with_these_attributes("optgroup", [
+  allow_tag_with_these_attributes("optgroup", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1140,7 +1185,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "label"
   ])
 
-  Meta.allow_tag_with_these_attributes("option", [
+  allow_tag_with_these_attributes("option", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1168,7 +1213,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "value"
   ])
 
-  Meta.allow_tag_with_these_attributes("output", [
+  allow_tag_with_these_attributes("output", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1191,11 +1236,10 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "title",
     "translate",
     "for",
-    "form",
     "name"
   ])
 
-  Meta.allow_tag_with_these_attributes("p", [
+  allow_tag_with_these_attributes("p", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1219,7 +1263,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("param", [
+  allow_tag_with_these_attributes("param", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1245,7 +1289,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "value"
   ])
 
-  Meta.allow_tag_with_these_attributes("pre", [
+  allow_tag_with_these_attributes("pre", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1269,7 +1313,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("progress", [
+  allow_tag_with_these_attributes("progress", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1295,7 +1339,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "max"
   ])
 
-  Meta.allow_tag_with_these_attributes("q", [
+  allow_tag_with_these_attributes("q", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1320,7 +1364,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "cite"
   ])
 
-  Meta.allow_tag_with_these_attributes("rp", [
+  allow_tag_with_these_attributes("rp", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1344,7 +1388,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("rt", [
+  allow_tag_with_these_attributes("rt", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1368,7 +1412,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("ruby", [
+  allow_tag_with_these_attributes("ruby", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1392,7 +1436,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("s", [
+  allow_tag_with_these_attributes("s", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1416,7 +1460,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("samp", [
+  allow_tag_with_these_attributes("samp", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1440,9 +1484,9 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  # Meta.allow_tag_with_these_attributes "script", ["src async defer type charset"]
+  # allow_tag_with_these_attributes "script", ["src async defer type charset"]
 
-  Meta.allow_tag_with_these_attributes("section", [
+  allow_tag_with_these_attributes("section", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1466,7 +1510,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("select", [
+  allow_tag_with_these_attributes("select", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1490,14 +1534,13 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate",
     "autofocus",
     "disabled",
-    "form",
     "multiple",
     "name",
     "required",
     "size"
   ])
 
-  Meta.allow_tag_with_these_attributes("small", [
+  allow_tag_with_these_attributes("small", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1521,9 +1564,9 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_uri_attributes("source", ["src"], @valid_schemes)
+  allow_tag_with_uri_attributes("source", ["src"], ["http", "https", "mailto"])
 
-  Meta.allow_tag_with_these_attributes("source", [
+  allow_tag_with_these_attributes("source", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1549,7 +1592,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "media"
   ])
 
-  Meta.allow_tag_with_these_attributes("span", [
+  allow_tag_with_these_attributes("span", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1573,7 +1616,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("strong", [
+  allow_tag_with_these_attributes("strong", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1597,7 +1640,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("sub", [
+  allow_tag_with_these_attributes("sub", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1621,7 +1664,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("summary", [
+  allow_tag_with_these_attributes("summary", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1645,7 +1688,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("sup", [
+  allow_tag_with_these_attributes("sup", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1669,7 +1712,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("table", [
+  allow_tag_with_these_attributes("table", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1693,7 +1736,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("tbody", [
+  allow_tag_with_these_attributes("tbody", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1717,7 +1760,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("td", [
+  allow_tag_with_these_attributes("td", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1744,7 +1787,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "headers"
   ])
 
-  Meta.allow_tag_with_these_attributes("textarea", [
+  allow_tag_with_these_attributes("textarea", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1771,7 +1814,6 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "cols",
     "dirname",
     "disabled",
-    "form",
     "inputmode",
     "maxlength",
     "name",
@@ -1782,7 +1824,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "wrap"
   ])
 
-  Meta.allow_tag_with_these_attributes("tfoot", [
+  allow_tag_with_these_attributes("tfoot", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1806,7 +1848,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("th", [
+  allow_tag_with_these_attributes("th", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1835,7 +1877,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "abbr"
   ])
 
-  Meta.allow_tag_with_these_attributes("thead", [
+  allow_tag_with_these_attributes("thead", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1859,7 +1901,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("time", [
+  allow_tag_with_these_attributes("time", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1885,7 +1927,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "pubdate"
   ])
 
-  Meta.allow_tag_with_these_attributes("title", [
+  allow_tag_with_these_attributes("title", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1909,7 +1951,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("tr", [
+  allow_tag_with_these_attributes("tr", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1933,9 +1975,9 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_uri_attributes("track", ["src"], @valid_schemes)
+  allow_tag_with_uri_attributes("track", ["src"], ["http", "https", "mailto"])
 
-  Meta.allow_tag_with_these_attributes("track", [
+  allow_tag_with_these_attributes("track", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1963,7 +2005,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "srclang"
   ])
 
-  Meta.allow_tag_with_these_attributes("u", [
+  allow_tag_with_these_attributes("u", [
     "accesskey",
     "class",
     "contenteditable",
@@ -1987,7 +2029,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("ul", [
+  allow_tag_with_these_attributes("ul", [
     "accesskey",
     "class",
     "contenteditable",
@@ -2011,7 +2053,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_these_attributes("var", [
+  allow_tag_with_these_attributes("var", [
     "accesskey",
     "class",
     "contenteditable",
@@ -2035,9 +2077,9 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tag_with_uri_attributes("video", ["src"], @valid_schemes)
+  allow_tag_with_uri_attributes("video", ["src"], ["http", "https", "mailto"])
 
-  Meta.allow_tag_with_these_attributes("video", [
+  allow_tag_with_these_attributes("video", [
     "accesskey",
     "class",
     "contenteditable",
@@ -2071,7 +2113,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "height"
   ])
 
-  Meta.allow_tag_with_these_attributes("wbr", [
+  allow_tag_with_these_attributes("wbr", [
     "accesskey",
     "class",
     "contenteditable",
@@ -2095,7 +2137,7 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     "translate"
   ])
 
-  Meta.allow_tags_with_style_attributes([
+  allow_tags_with_style_attributes([
     "a",
     "blockquote",
     "br",
@@ -2180,9 +2222,37 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
     {"style", scrub_attributes("style", attributes), [scrub_css(text)]}
   end
 
-  defp scrub_attributes("style", attributes) do
-    Enum.map(attributes, fn attr -> scrub_attribute("style", attr) end)
+  @doc false
+  def scrub_attributes("meta", attributes) do
+    attributes_as_map = Map.new(attributes)
+
+    attributes
+    |> Enum.map(fn attr -> scrub_attribute("meta", attr, attributes_as_map) end)
     |> Enum.reject(&is_nil(&1))
+  end
+
+  def scrub_attributes("style", attributes) do
+    attributes
+    |> Enum.map(&scrub_attribute("style", &1))
+    |> Enum.reject(&is_nil(&1))
+  end
+
+  @allowed_meta_http_equiv_content ["content-security-policy", "content-type", "refresh"]
+
+  def scrub_attribute("meta", {"content", value}, %{"http-equiv" => http_equiv}) do
+    if not any_of?(http_equiv, @allowed_meta_http_equiv_content) do
+      {"content", value}
+    end
+  end
+
+  def scrub_attribute("meta", {"http-equiv", value}, _attributes_as_map) do
+    if not any_of?(value, @allowed_meta_http_equiv_content) do
+      {"content", value}
+    end
+  end
+
+  def scrub_attribute("meta", {attr, value}, _attributes_as_map) do
+    scrub_attribute("meta", {attr, value})
   end
 
   def scrub_attribute("style", {"media", value}), do: {"media", value}
@@ -2197,9 +2267,11 @@ defmodule HtmlSanitizeEx.Scrubber.HTML5 do
   def scrub_attribute(_tag, {"aria-" <> data_tag, value}),
     do: {"aria-" <> data_tag, value}
 
+  defp any_of?(string, list) do
+    Enum.member?(list, String.downcase(String.trim(string)))
+  end
+
   defp scrub_css(text) do
     HtmlSanitizeEx.Scrubber.CSS.scrub(text)
   end
-
-  Meta.strip_everything_not_covered()
 end

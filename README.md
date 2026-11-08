@@ -1,4 +1,4 @@
-# HtmlSanitizeEx [![Build Status](https://travis-ci.org/rrrene/html_sanitize_ex.svg)](https://travis-ci.org/rrrene/html_sanitize_ex) [![Inline docs](http://inch-ci.org/github/rrrene/html_sanitize_ex.svg?branch=master)](http://inch-ci.org/github/rrrene/html_sanitize_ex)
+# HtmlSanitizeEx [![CI Tests](https://github.com/rrrene/html_sanitize_ex/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/rrrene/html_sanitize_ex/actions/workflows/ci-workflow.yml) [![Inline docs](http://inch-ci.org/github/rrrene/html_sanitize_ex.svg?branch=master)](http://inch-ci.org/github/rrrene/html_sanitize_ex)
 
 `html_sanitize_ex` provides a fast and straightforward HTML Sanitizer written in Elixir which lets you include HTML authored by third-parties in your web application while protecting against XSS.
 
@@ -10,17 +10,13 @@ It is the first Hex package to come out of the [elixirstatus.com](http://elixirs
 
 `html_sanitize_ex` parses a given HTML string and, based on the used [Scrubber](https://github.com/rrrene/html_sanitize_ex/tree/master/lib/html_sanitize_ex/scrubber), either completely strips it from HTML tags or sanitizes it by only allowing certain HTML elements and attributes to be present.
 
-**NOTE:** The one thing missing at this moment is ***support for styles***. To add this, we have to implement a Scrubber for CSS, to prevent nasty CSS hacks using `<style>` tags and attributes.
-
-Otherwise `html_sanitize_ex` is a full-featured HTML sanitizer.
-
 ## Installation
 
 Add html_sanitize_ex as a dependency in your `mix.exs` file.
 
 ```elixir
 defp deps do
-  [{:html_sanitize_ex, "~> 1.3.0-rc3"}]
+  [{:html_sanitize_ex, "~> 1.4"}]
 end
 ```
 
@@ -31,27 +27,108 @@ The only dependency of `html_sanitize_ex` is `mochiweb` which is used to parse H
 
 ## Usage
 
-It can strip all tags from the given string:
+Depending on the scrubber you select, it can strip all tags from the given string:
 
-    text = "<a href=\"javascript:alert('XSS');\">text here</a>"
-    HtmlSanitizeEx.strip_tags(text)
-    # => "text here"
+```elixir
+text = "<a href=\"javascript:alert('XSS');\">text here</a>"
+HtmlSanitizeEx.strip_tags(text)
+# => "text here"
+```
 
 Or allow certain basic HTML elements to remain:
 
-    text = "<h1>Hello <script>World!</script></h1>"
-    HtmlSanitizeEx.basic_html(text)
-    # => "<h1>Hello World!</h1>"
+```elixir
+text = "<h1>Hello <script>World!</script></h1>"
+HtmlSanitizeEx.basic_html(text)
+# => "<h1>Hello World!</h1>"
+```
 
-The following scrubbing options exist:
+There are built-in scrubbers that cover common use cases, but you can also
+easily define custom scrubbers (see the next section).
 
-    HtmlSanitizeEx.noscrub(html)
-    HtmlSanitizeEx.basic_html(html)
-    HtmlSanitizeEx.html5(html)
-    HtmlSanitizeEx.markdown_html(html)
-    HtmlSanitizeEx.strip_tags(html)
+The following default scrubbing options exist:
 
-**TODO: write more comprehensive usage description**
+```elixir
+HtmlSanitizeEx.basic_html(html)
+HtmlSanitizeEx.html5(html)
+HtmlSanitizeEx.markdown_html(html)
+HtmlSanitizeEx.strip_tags(html)
+```
+
+There is also one scrubber primarily used for testing:
+
+```elixir
+HtmlSanitizeEx.noscrub(html)
+```
+
+Before using or extending a built-in scrubber, you should verify that it functions in the way
+you expect. The built-in scrubbers are located in
+[/lib/html_sanitize_ex/scrubber](https://github.com/rrrene/html_sanitize_ex/tree/master/lib/html_sanitize_ex/scrubber)
+
+## Custom Scrubbers
+
+A custom scrubber has the advantage of allowing you to support only the minimum
+functionality needed for your use case.
+
+With a custom scrubber, you define which tags, attributes, and uri schemes (e.g.
+`https`, `mailto`, `javascript`, etc.) are allowed. Anything not allowed can
+then be stripped out.
+
+Here is an example of a custom scrubber which allows only `p`, `h1`, and
+`a` tags, and restricts the `href` attribute to only the `https` and `mailto`
+[URI schemes](https://en.wikipedia.org/wiki/List_of_URI_schemes). It also
+removes CDATA sections and comments.
+
+```elixir
+defmodule MyProject.MyScrubber do
+  use HtmlSanitizeEx
+
+  allow_tag_with_these_attributes("p", [])
+  allow_tag_with_these_attributes("h1", [])
+
+  allow_tag_with_uri_attributes("a", ["href"], ["https", "mailto"])
+end
+```
+
+Then, you can use the scrubber in your project by calling `MyProject.MyScrubber.sanitize/1`:
+
+```elixir
+text = "<h1>Hello <script>World!</script></h1>"
+MyProject.MyScrubber.sanitize(text)
+# => "<h1>Hello World!</h1>"
+```
+
+A great way to make a custom scrubber is to use one the of built-in scrubbers closest to your use case as a template.
+
+The built in scrubbers are located in
+[/lib/html_sanitize_ex/scrubber](https://github.com/rrrene/html_sanitize_ex/tree/master/lib/html_sanitize_ex/scrubber)
+
+
+## Extending Scrubbers
+
+Let's say you love `HtmlSanitizeEx.basic_html/1`, you just need it to also support the `small` tag (for whatever reason).
+
+You can extend any scrubber by using the `:extend` option.
+
+```elixir
+defmodule MyProject.MyScrubber do
+  use HtmlSanitizeEx, extend: :basic_html
+
+  allow_tag_with_these_attributes("small", [])
+end
+```
+
+You can extend `:basic_html`, `:html5`, `:markdown_html` and `:strip_tags` to extend built-in functionality and you can also extend any custom scrubber you created:
+
+```elixir
+defmodule MyProject.MyOtherScrubber do
+  use HtmlSanitizeEx, extend: MyProject.MyScrubber
+
+  allow_tag_with_these_attributes("p", ["class"])
+end
+```
+
+The result is a scrubber that works like the built-in BasicHTML scrubber, but also allows `small` tags and `class` attributes on `<p>` tags.
 
 
 ## Contributing

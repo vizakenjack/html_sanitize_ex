@@ -1,5 +1,5 @@
 defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   defp sanitize(text) do
     text |> HtmlSanitizeEx.Scrubber.scrub(HtmlSanitizeEx.Scrubber.MarkdownHTML)
@@ -166,9 +166,7 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
   @tag href_scrubbing: true
   test "test_strip_links_leaves_nonlink_tags" do
     assert "<a href=\"almost\">My mind</a>\n<a href=\"almost\">all <b>day</b> long</a>" ==
-             sanitize(
-               "<a href='almost'>My mind</a>\n<A href='almost'>all <b>day</b> long</A>"
-             )
+             sanitize("<a href='almost'>My mind</a>\n<A href='almost'>all <b>day</b> long</A>")
   end
 
   @tag href_scrubbing: true
@@ -180,39 +178,11 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
              sanitize(input)
   end
 
-  @a_href_hacks [
-    "<a href=\"javascript:alert('XSS');\">text here</a>",
-    "<a href=javascript:alert('XSS')>text here</a>",
-    "<a href=JaVaScRiPt:alert('XSS')>text here</a>",
-    "<a href=javascript:alert(&quot;XSS&quot;)>text here</a>",
-    "<a href=javascript:alert(String.fromCharCode(88,83,83))>text here</a>",
-    "<a href=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>text here</a>",
-    "<a href=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>text here</a>",
-    "<a href=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>text here</a>",
-    "<a href=\"jav\tascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x09;ascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x0A;ascript:alert('XSS');\">text here</a>",
-    "<a href=\"jav&#x0D;ascript:alert('XSS');\">text here</a>",
-    "<a href=\" &#14;  javascript:alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x3a;alert('XSS');\">text here</a>",
-    "<a href=`javascript:alert(\"RSnake says, 'XSS'\")`>text here</a>",
-    "<a href=\"javascript&#x3a;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x003a;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x3A;alert('XSS');\">text here</a>",
-    "<a href=\"javascript&#x003A;alert('XSS');\">text here</a>",
-    "<a href=\"&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;\">text here</a>",
-    "<a href=\"JAVASCRIPT:alert(\'foo\')\">text here</a>",
-    "<a href=\"java<!-- -->script:alert(\'foo\')\">text here</a>",
-    "<a href=\"awesome.html#this:stuff\">text here</a>",
-    "<a href=\"java\0&#14;\t\r\n script:alert(\'foo\')\">text here</a>",
-    "<a href=\"java&#0000001script:alert(\'foo\')\">text here</a>",
-    "<a href=\"java&#0000000script:alert(\'foo\')\">text here</a>"
-  ]
-
   @tag href_scrubbing: true
   test "strips malicious protocol hacks from a href attribute" do
-    expected = "<a>text here</a>"
-    Enum.each(@a_href_hacks, fn x -> assert expected == sanitize(x) end)
+    {expected, href_hacks} = Fixtures.a_href_hacks()
+
+    Enum.each(href_hacks, fn x -> assert expected == sanitize(x) end)
   end
 
   @tag href_scrubbing: true
@@ -259,9 +229,7 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
 
   test "sanitize_script" do
     assert "a b cblah blah blahd e f" ==
-             sanitize(
-               "a b c<script language=\"Javascript\">blah blah blah</script>d e f"
-             )
+             sanitize("a b c<script language=\"Javascript\">blah blah blah</script>d e f")
   end
 
   @tag href_scrubbing: true
@@ -295,14 +263,10 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
              sanitize(~s(<a href="foo" onclick="bar"><script>baz</script></a>))
 
     assert "<a href=\"http://example.com\">baz</a>" ==
-             sanitize(
-               ~s(<a href="http://example.com" onclick="bar"><script>baz</script></a>)
-             )
+             sanitize(~s(<a href="http://example.com" onclick="bar"><script>baz</script></a>))
 
     assert "<a href=\"https://example.com\">baz</a>" ==
-             sanitize(
-               ~s(<a href="https://example.com" onclick="bar"><script>baz</script></a>)
-             )
+             sanitize(~s(<a href="https://example.com" onclick="bar"><script>baz</script></a>))
   end
 
   # test "video_poster_sanitization" do
@@ -322,27 +286,10 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
     assert expected == sanitize(input)
   end
 
-  @image_src_hacks [
-    "<IMG SRC=\"javascript:alert('XSS');\">",
-    "<IMG SRC=javascript:alert('XSS')>",
-    "<IMG SRC=JaVaScRiPt:alert('XSS')>",
-    "<IMG SRC=javascript:alert(&quot;XSS&quot;)>",
-    "<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>",
-    "<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>",
-    "<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>",
-    "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>",
-    "<IMG SRC=\"jav\tascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x09;ascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x0A;ascript:alert('XSS');\">",
-    "<IMG SRC=\"jav&#x0D;ascript:alert('XSS');\">",
-    "<IMG SRC=\" &#14;  javascript:alert('XSS');\">",
-    "<IMG SRC=\"javascript&#x3a;alert('XSS');\">",
-    "<IMG SRC=`javascript:alert(\"RSnake says, 'XSS'\")`>"
-  ]
-
   test "strips malicious protocol hacks from img src attribute" do
-    expected = "<img />"
-    Enum.each(@image_src_hacks, fn x -> assert expected == sanitize(x) end)
+    {expected, image_src_hacks} = Fixtures.image_src_hacks()
+
+    Enum.each(image_src_hacks, fn x -> assert expected == sanitize(x) end)
   end
 
   test "strips script tag" do
@@ -396,9 +343,7 @@ defmodule HtmlSanitizeExScrubberMarkdownHTMLTest do
 
   test "should_sanitize_non_alpha_and_non_digit_characters_in_tags" do
     assert "<a></a>foo" ==
-             sanitize(
-               "<a onclick!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>foo</a>"
-             )
+             sanitize("<a onclick!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>foo</a>")
   end
 
   test "should_sanitize_invalid_tag_names_in_single_tags" do

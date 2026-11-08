@@ -1,11 +1,14 @@
 defmodule HtmlSanitizeEx.Mixfile do
   use Mix.Project
 
+  @version "1.5.6"
+
   def project do
     [
       app: :html_sanitize_ex,
       version: "1.4.3",
       elixir: "~> 1.0",
+      docs: docs(),
       description: "HTML sanitizer for Elixir",
       source_url: "https://github.com/rrrene/html_sanitize_ex",
       package: [
@@ -21,11 +24,18 @@ defmodule HtmlSanitizeEx.Mixfile do
     ]
   end
 
+  defp docs do
+    [
+      main: HtmlSanitizeEx,
+      extras: ["CHANGELOG.md"]
+    ]
+  end
+
   # Configuration for the OTP application
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :mochiweb]]
+    [extra_applications: [:logger, :mochiweb]]
   end
 
   # Dependencies can be Hex packages:
@@ -39,7 +49,9 @@ defmodule HtmlSanitizeEx.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:mochiweb, "~> 2.15"}
+      {:mochiweb, "~> 2.15 or ~> 3.1"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
